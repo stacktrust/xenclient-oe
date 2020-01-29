@@ -46,6 +46,7 @@ IMAGE_INSTALL += "\
     xenclient-preload-hs-libs \
     linux-firmware-i915 \
     devicemodel-stubdom \
+    xenclient-stubdomain-kernel \
     ${@bb.utils.contains('IMAGE_FEATURES', 'debug-tweaks', 'packagegroup-selinux-policycoreutils audit', '' ,d)} \
 "
 
