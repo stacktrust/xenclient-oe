@@ -38,3 +38,5 @@ FILES_${PN} += " \
 RDEPENDS_${PN} += " \
     bash \
 "
+
+PACKAGECONFIG_remove = "thin-provisioning-tools"
