@@ -168,6 +168,8 @@ openxt_install_answerfiles() {
 }
 IMAGE_POSTPROCESS_COMMAND += "openxt_install_answerfiles; "
 
+addtask rootfs after do_unpack
+
 # Re-enable do_fetch/do_unpack to fetch image specific configuration files
 # (see SRC_URI).
 python () {
