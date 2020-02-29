@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Verifies the integrity of the metadata files in a XenClient repository.
+# Verifies the integrity of the metadata files in an OpenXT repository.
 
 PROD_CERT_FILE="/usr/share/xenclient/repo-certs/prod/cert.pem"
 DEV_CERT_FILE="/usr/share/xenclient/repo-certs/dev/cert.pem"
@@ -21,9 +21,9 @@ parse_args()
 
     REPOSITORY_DIR="$1"
 
-    REPOSITORY_FILE="${REPOSITORY_DIR}/XC-REPOSITORY"
-    PACKAGES_FILE="${REPOSITORY_DIR}/XC-PACKAGES"
-    SIGNATURE_FILE="${REPOSITORY_DIR}/XC-SIGNATURE"
+    REPOSITORY_FILE="${REPOSITORY_DIR}/OXT-REPOSITORY"
+    PACKAGES_FILE="${REPOSITORY_DIR}/OXT-PACKAGES"
+    SIGNATURE_FILE="${REPOSITORY_DIR}/OXT-SIGNATURE"
 }
 
 usage()
@@ -31,19 +31,19 @@ usage()
     cat <<EOF
 Usage: $(basename $0) [-d] REPOSITORY_DIR
 
-Verifies the integrity of the metadata files (XC-REPOSITORY, XC-PACKAGES and
-XC-SIGNATURE) in a XenClient repository:
+Verifies the integrity of the metadata files (OXT-REPOSITORY, OXT-PACKAGES and
+OXT-SIGNATURE) in an ${OXT_BRAND_MC} repository:
 
-  - Checks that XC-PACKAGES matches the checksum listed in XC-REPOSITORY.
-  - Checks that XC-REPOSITORY matches the signature in XC-SIGNATURE.
+  - Checks that OXT-PACKAGES matches the checksum listed in OXT-REPOSITORY.
+  - Checks that OXT-REPOSITORY matches the signature in OXT-SIGNATURE.
 
 Note that this only verifies the integrity of the metadata files: it does not
 verify that the packages in the repository match the checksums listed in
-XC-PACKAGES.
+OXT-PACKAGES.
 
 The -d option should only be used for testing purposes. It allows signatures
-created with the XenClient development signing certificate in addition to
-signatures created with the XenClient production signing certificate.
+created with the ${OXT_BRAND_MC} development signing certificate in addition to
+signatures created with the ${OXT_BRAND_MC} production signing certificate.
 
 Exit status:
 
@@ -54,13 +54,13 @@ Exit status:
 EOF
 }
 
-verify_xc_packages()
+verify_oxt_packages()
 {
     local PACKAGES_CHECKSUM=$(sed -n 's/^packages://p' "${REPOSITORY_FILE}") ||
         die "error reading '${REPOSITORY_FILE}'"
 
     [ -n "${PACKAGES_CHECKSUM}" ] ||
-        die "XC-PACKAGES checksum MISSING"
+        die "OXT-PACKAGES checksum MISSING"
 
     local FILE_CHECKSUM=$(sha256sum "${PACKAGES_FILE}" | cut -f1 -d' ') ||
         die "error calculating checksum of '${PACKAGES_FILE}'"
@@ -69,10 +69,10 @@ verify_xc_packages()
         die "error calculating checksum of '${PACKAGES_FILE}'"
 
     [ "${FILE_CHECKSUM}" = "${PACKAGES_CHECKSUM}" ] ||
-        die "XC-PACKAGES checksum NOT VALID"
+        die "OXT-PACKAGES checksum NOT VALID"
 }
 
-verify_xc_repository()
+verify_oxt_repository()
 {
     local TEMP_FILE=$(mktemp -t) ||
         die "error creating temporary file"
@@ -116,11 +116,11 @@ die()
 
 parse_args "$@"
 
-# Verify XC-PACKAGES against checksum in XC-REPOSITORY.
-verify_xc_packages
+# Verify OXT-PACKAGES against checksum in OXT-REPOSITORY.
+verify_oxt_packages
 
-# Verify XC-REPOSITORY against signature in XC-SIGNATURE. Must be done last,
+# Verify OXT-REPOSITORY against signature in OXT-SIGNATURE. Must be done last,
 # so we only exit with status 1 if metadata is valid except for signature.
-verify_xc_repository
+verify_oxt_repository
 
 exit 0

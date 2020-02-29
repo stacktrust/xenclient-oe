@@ -21,7 +21,7 @@ RDEPENDS_${PN} = " \
     busybox \
     xenclient-eula \
     xenclient-keyboard-list \
-    xenclient-repo-certs \
+    openxt-repo-certs \
     xenclient-caps \
 "
 RDEPENDS_${PN}-part2 += "busybox"

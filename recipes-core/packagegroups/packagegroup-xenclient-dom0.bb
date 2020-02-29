@@ -76,7 +76,7 @@ RDEPENDS_${PN} = " \
     xenclient-udev-force-discreet-net-to-eth0 \
     xenclient-nwd \
     wget \
-    xenclient-repo-certs \
+    openxt-repo-certs \
     gobi-loader \
     usb-modeswitch \
     upgrade-db \
