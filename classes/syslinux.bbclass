@@ -34,6 +34,7 @@ SYSLINUX_ALLOWOPTIONS ?= "1"
 SYSLINUX_ROOT ?= "${ROOT}"
 SYSLINUX_CFG_VM  ?= "${S}/syslinux_vm.cfg"
 SYSLINUX_CFG_LIVE ?= "${S}/syslinux_live.cfg"
+SYSLINUX_MULTIBOOT ?= "0"
 APPEND ?= ""
 
 # Need UUID utility code.
@@ -48,7 +49,7 @@ syslinux_populate() {
 
 	# Install the config files
 	install -m 0644 ${SYSLINUX_CFG} ${DEST}${BOOTDIR}/${CFGNAME}
-	if [ "${AUTO_SYSLINUXMENU}" = 1 ] ; then
+	if [ "${AUTO_SYSLINUXMENU}" == "1" ] ; then
 		install -m 0644 ${STAGING_DATADIR}/syslinux/vesamenu.c32 ${DEST}${BOOTDIR}/vesamenu.c32
 		install -m 0444 ${STAGING_DATADIR}/syslinux/libcom32.c32 ${DEST}${BOOTDIR}/libcom32.c32
 		install -m 0444 ${STAGING_DATADIR}/syslinux/libutil.c32 ${DEST}${BOOTDIR}/libutil.c32
@@ -63,12 +64,22 @@ syslinux_iso_populate() {
 	syslinux_populate $iso_dir ${ISOLINUXDIR} isolinux.cfg
 	install -m 0644 ${STAGING_DATADIR}/syslinux/isolinux.bin $iso_dir${ISOLINUXDIR}
 	install -m 0644 ${STAGING_DATADIR}/syslinux/ldlinux.c32 $iso_dir${ISOLINUXDIR}
+
+    if [ "${SYSLINUX_MULTIBOOT}" == "1" ] ; then
+        install -m 0444 ${STAGING_DATADIR}/syslinux/libcom32.c32 $iso_dir${ISOLINUXDIR}
+        install -m 0444 ${STAGING_DATADIR}/syslinux/mboot.c32 $iso_dir${ISOLINUXDIR}
+    fi
 }
 
 syslinux_hddimg_populate() {
 	hdd_dir=$1
 	syslinux_populate $hdd_dir ${SYSLINUXDIR} syslinux.cfg
 	install -m 0444 ${STAGING_DATADIR}/syslinux/ldlinux.sys $hdd_dir${SYSLINUXDIR}/ldlinux.sys
+
+    if [ "${SYSLINUX_MULTIBOOT}" == "1" ] ; then
+        install -m 0444 ${STAGING_DATADIR}/syslinux/libcom32.c32 $hdd_dir${SYSLINUXDIR}
+        install -m 0444 ${STAGING_DATADIR}/syslinux/mboot.c32 $hdd_dir${SYSLINUXDIR}
+    fi
 }
 
 syslinux_hddimg_install() {
@@ -142,6 +153,8 @@ python build_syslinux_cfg () {
     else:
         cfgfile.write('PROMPT 1\n')
 
+    multiboot = (d.getVar('SYSLINUX_MULTIBOOT') == "1")
+
     if menu:
         cfgfile.write('ui vesamenu.c32\n')
         cfgfile.write('menu title Select kernel options and boot kernel\n')
@@ -170,7 +183,11 @@ python build_syslinux_cfg () {
 
         kernel = localdata.getVar('KERNEL_IMAGETYPE')
         for btype in btypes:
-            cfgfile.write('LABEL %s%s\nKERNEL /%s\n' % (btype[0], label, kernel))
+
+            if multiboot:
+                cfgfile.write('LABEL %s%s\nKERNEL mboot.c32\n' % (btype[0], label))
+            else:
+                cfgfile.write('LABEL %s%s\nKERNEL /%s\n' % (btype[0], label, kernel))
 
             exargs = d.getVar('SYSLINUX_KERNEL_ARGS')
             if exargs:
@@ -179,10 +196,11 @@ python build_syslinux_cfg () {
             append = localdata.getVar('APPEND')
             initrd = localdata.getVar('INITRD')
 
-            append = root + " " + append
+            if not multiboot:
+                append = root + " " + append
             cfgfile.write('APPEND ')
 
-            if initrd:
+            if initrd and not multiboot:
                 cfgfile.write('initrd=/initrd ')
 
             cfgfile.write('LABEL=%s '% (label))
