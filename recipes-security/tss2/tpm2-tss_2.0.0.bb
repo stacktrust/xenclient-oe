@@ -5,7 +5,7 @@ SECTION = "tpm"
 LICENSE = "BSD-2-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=0b1d631c4218b72f6b05cb58613606f4"
 
-DEPENDS = "autoconf-archive autoconf pkgconfig libgcrypt gnome-common"
+DEPENDS = "autoconf-archive autoconf pkgconfig libgcrypt"
 
 SRCREV = "ced20c209397f58d81da79810f49976ba2d36566"
 
