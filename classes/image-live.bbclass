@@ -50,11 +50,14 @@ IMAGE_TYPES_MASKED += "live hddimg iso"
 python() {
     image_b = d.getVar('IMAGE_BASENAME')
     initrd_i = d.getVar('INITRD_IMAGE_LIVE')
+    depends_type = ('mcdepends' if (d.getVar('BBMULTICONFIG')
+                                    and initrd_i.count(':') == 3)
+                                else 'depends')
     if image_b == initrd_i:
         bb.error('INITRD_IMAGE_LIVE %s cannot use image live, hddimg or iso.' % initrd_i)
         bb.fatal('Check IMAGE_FSTYPES and INITRAMFS_FSTYPES settings.')
     elif initrd_i:
-        d.appendVarFlag('do_bootimg', 'depends', ' %s:do_image_complete' % initrd_i)
+        d.appendVarFlag('do_bootimg', depends_type, ' %s:do_image_complete' % initrd_i)
 }
 
 HDDDIR = "${S}/hddimg"
